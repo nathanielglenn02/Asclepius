@@ -2,7 +2,13 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.Asclepius" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Warna utama aplikasi -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Warna latar belakang dan teks -->
+        <item name="colorOnPrimary">#FFFFFF</item> <!-- Teks putih di atas primary -->
     </style>
 
     <style name="Theme.Asclepius" parent="Base.Theme.Asclepius" />
