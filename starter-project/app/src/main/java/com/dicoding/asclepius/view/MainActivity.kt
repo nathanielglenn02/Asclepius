@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dicoding.asclepius.databinding.ActivityMainBinding
@@ -18,8 +17,8 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-
     private var currentImageUri: Uri? = null
+    private val pickImageRequestCode = 1
     private val cropImageRequestCode = UCrop.REQUEST_CROP
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,33 +40,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Menggunakan ActivityResultContracts untuk izin
-    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        val granted = permissions.all { it.value }
-        if (!granted) {
-            showToast("Izin akses diperlukan untuk melanjutkan")
-        }
-    }
-
     private fun checkAndRequestPermissions() {
         val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        if (permissions.any { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }) {
-            permissionLauncher.launch(permissions)
+        val permissionsToRequest = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-    }
-
-    // Menggunakan ActivityResultContracts untuk galeri
-    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { uri ->
-                startCrop(uri)
-            }
+        if (permissionsToRequest.isNotEmpty()) {
+            requestPermissions(permissionsToRequest.toTypedArray(), 0)
         }
     }
 
     private fun startGallery() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        galleryLauncher.launch(intent)
+        startActivityForResult(intent, pickImageRequestCode)
     }
 
     private fun startCrop(imageUri: Uri) {
@@ -84,16 +69,20 @@ class MainActivity : AppCompatActivity() {
             .withOptions(options)
             .withAspectRatio(1f, 1f)
             .withMaxResultSize(224, 224)
-            .start(this)
+            .start(this) // Menggunakan "start(this)" tanpa cropLauncher
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == cropImageRequestCode && resultCode == Activity.RESULT_OK) {
+        if (requestCode == pickImageRequestCode && resultCode == Activity.RESULT_OK) {
+            data?.data?.let { uri ->
+                startCrop(uri) // Memulai proses crop setelah memilih gambar dari galeri
+            }
+        } else if (requestCode == cropImageRequestCode && resultCode == Activity.RESULT_OK) {
             val resultUri = UCrop.getOutput(data!!)
             resultUri?.let {
                 currentImageUri = it
-                showImage() // Menampilkan gambar yang baru dicrop
+                showImage() // Menampilkan gambar yang sudah dicrop ke previewImageView
             }
         } else if (resultCode == UCrop.RESULT_ERROR) {
             val cropError = UCrop.getError(data!!)
@@ -104,7 +93,7 @@ class MainActivity : AppCompatActivity() {
     private fun showImage() {
         currentImageUri?.let { uri ->
             binding.previewImageView.setImageURI(null) // Reset terlebih dahulu untuk menghindari cache
-            binding.previewImageView.setImageURI(uri) // Set gambar terbaru
+            binding.previewImageView.setImageURI(uri) // Set gambar terbaru yang sudah dicrop
         } ?: showToast("Gambar tidak tersedia")
     }
 
