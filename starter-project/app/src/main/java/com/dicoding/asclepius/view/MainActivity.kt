@@ -4,16 +4,24 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.dicoding.asclepius.data.AppDatabase
+import com.dicoding.asclepius.data.History
 import com.dicoding.asclepius.databinding.ActivityMainBinding
 import com.dicoding.asclepius.helper.ImageClassifierHelper
 import com.yalantis.ucrop.UCrop
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -37,6 +45,38 @@ class MainActivity : AppCompatActivity() {
         // Set onClickListener untuk tombol analisis
         binding.analyzeButton.setOnClickListener {
             analyzeImage()
+        }
+
+        binding.historyButton.setOnClickListener {
+            startActivity(Intent(this, HistoryActivity::class.java))
+        }
+    }
+
+    private fun saveImageToCache(bitmap: Bitmap): Uri? {
+        val fileName = "predicted_image_${UUID.randomUUID()}.jpg"
+        val file = File(cacheDir, fileName)
+        return try {
+            val outputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+            Uri.fromFile(file)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    // Fungsi untuk menyimpan data prediksi ke database
+    private fun savePredictionToDatabase(imageUri: String, prediction: String, confidence: Float) {
+        val history = History(
+            imageUri = imageUri,
+            prediction = prediction,
+            confidence = confidence
+        )
+        val database = AppDatabase.getDatabase(this)
+        CoroutineScope(Dispatchers.IO).launch {
+            database.historyDao().insertHistory(history)
         }
     }
 
@@ -99,12 +139,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun analyzeImage() {
         currentImageUri?.let { uri ->
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+
+            // Simpan gambar yang sudah diproses ke folder cache
+            val savedUri = saveImageToCache(bitmap)
+            if (savedUri == null) {
+                showToast("Gagal menyimpan gambar.")
+                return
+            }
             val classifier = ImageClassifierHelper(context = this)
             val (label, confidence) = classifier.classifyStaticImage(uri) ?: return showToast("Gagal memproses gambar")
 
             val prediction = "$label : ${"%.2f".format(confidence)}%"
             showToast(prediction)
             classifier.close()
+
+            // Simpan ke database setelah prediksi selesai
+            savePredictionToDatabase(savedUri.toString(), label, confidence)
 
             moveToResult(uri, prediction)
         } ?: showToast("Pilih gambar terlebih dahulu untuk dianalisa")

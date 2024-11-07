@@ -48,6 +48,17 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/analyze"
+        app:layout_constraintBottom_toTopOf="@id/historyButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Tombol untuk melihat riwayat -->
+    <Button
+        android:id="@+id/historyButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/history"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
