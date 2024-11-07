@@ -50,6 +50,11 @@ class MainActivity : AppCompatActivity() {
         binding.historyButton.setOnClickListener {
             startActivity(Intent(this, HistoryActivity::class.java))
         }
+
+        binding.newsButton.setOnClickListener {
+            val intent = Intent(this, NewsActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun saveImageToCache(bitmap: Bitmap): Uri? {

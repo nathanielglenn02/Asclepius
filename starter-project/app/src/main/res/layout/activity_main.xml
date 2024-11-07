@@ -37,6 +37,7 @@
         android:id="@+id/galleryButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:text="@string/gallery"
         app:layout_constraintBottom_toTopOf="@id/analyzeButton"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,7 +48,19 @@
         android:id="@+id/analyzeButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:text="@string/analyze"
+        app:layout_constraintBottom_toTopOf="@id/newsButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Tombol untuk melihat berita kanker -->
+    <Button
+        android:id="@+id/newsButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/artilcle"
         app:layout_constraintBottom_toTopOf="@id/historyButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
