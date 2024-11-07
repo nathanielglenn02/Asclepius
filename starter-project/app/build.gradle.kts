@@ -54,5 +54,8 @@ dependencies {
 
 
     // TODO: Tambahkan Library TensorFlow Lite
+    implementation("com.github.yalantis:ucrop:2.2.6")
+
+
 
 }
