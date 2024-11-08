@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -69,7 +70,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startCrop(imageUri: Uri) {
-        val destinationUri = Uri.fromFile(File(cacheDir, "cropped_image.jpg"))
+        // tambahin URI gambar ke variabel imageUriHistory
+        viewModel.addImageUri(imageUri)
+        // biar file cache gambar lama nggak ketumpuk/kena replace sama gambar baru, jadi dibedain aja nama file nya pake UUID
+        val uniqueFileName = "cropped_image_${UUID.randomUUID()}.jpg"
+        val destinationUri = Uri.fromFile(File(cacheDir, uniqueFileName))
+
         val options = UCrop.Options().apply {
             setCompressionQuality(80)
             setHideBottomControls(false)
@@ -93,11 +99,20 @@ class MainActivity : AppCompatActivity() {
             }
         } else if (requestCode == cropImageRequestCode && resultCode == Activity.RESULT_OK) {
             val resultUri = UCrop.getOutput(data!!)
+            Log.d("MainActivity", "Crop result: $resultUri")
             resultUri?.let {
                 viewModel.currentImageUri = it
                 showImage(it)
             }
-        } else if (requestCode == cropImageRequestCode && resultCode == UCrop.RESULT_ERROR) {
+        } // jangan lupa nge-handle state Canceled nya
+        else if (requestCode == cropImageRequestCode && resultCode == Activity.RESULT_CANCELED) {
+            Log.d("MainActivity", "Crop canceled")
+            showToast("Crop dibatalkan.")
+
+            viewModel.revertToPreviousImageUri()
+            viewModel.currentImageUri?.let { showImage(it) }
+        }
+        else if (requestCode == cropImageRequestCode && resultCode == UCrop.RESULT_ERROR) {
             val cropError = UCrop.getError(data!!)
             cropError?.let { showToast("Crop error: ${it.message}") }
         }
@@ -126,6 +141,7 @@ class MainActivity : AppCompatActivity() {
             showToast(prediction)
             classifier.close()
             savePredictionToDatabase(savedUri.toString(), label, confidence)
+
             moveToResult(savedUri, prediction)
         } ?: showToast("Pilih gambar terlebih dahulu untuk dianalisa.")
     }
