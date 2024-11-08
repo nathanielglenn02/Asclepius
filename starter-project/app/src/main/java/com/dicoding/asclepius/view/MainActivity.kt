@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.dicoding.asclepius.R
 import com.dicoding.asclepius.data.AppDatabase
 import com.dicoding.asclepius.data.History
 import com.dicoding.asclepius.databinding.ActivityMainBinding
@@ -84,6 +85,7 @@ class MainActivity : AppCompatActivity() {
             setHideBottomControls(false)
             setFreeStyleCropEnabled(true)
             setToolbarTitle("Crop & Rotate Image")
+            setToolbarCancelDrawable(R.drawable.ic_transparent)
         }
 
         UCrop.of(imageUri, destinationUri)
