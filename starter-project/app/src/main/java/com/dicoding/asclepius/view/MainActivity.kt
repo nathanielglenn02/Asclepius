@@ -36,27 +36,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Memeriksa dan meminta izin
         checkAndRequestPermissions()
-
-        // Tampilkan gambar jika `currentImageUri` sudah ada di ViewModel
         viewModel.currentImageUri?.let { showImage(it) }
-
-        // Set onClickListener untuk tombol galeri
         binding.galleryButton.setOnClickListener {
             startGallery()
         }
-
-        // Set onClickListener untuk tombol analisis
         binding.analyzeButton.setOnClickListener {
             analyzeImage()
         }
-
         binding.historyButton.setOnClickListener {
             startActivity(Intent(this, HistoryActivity::class.java))
         }
-
         binding.newsButton.setOnClickListener {
             val intent = Intent(this, NewsActivity::class.java)
             startActivity(intent)

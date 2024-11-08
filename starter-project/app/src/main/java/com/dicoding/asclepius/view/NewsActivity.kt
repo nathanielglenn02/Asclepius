@@ -21,13 +21,9 @@ class NewsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityNewsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Setup RecyclerView
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        newsAdapter = NewsAdapter(listOf()) // Inisialisasi adapter dengan list kosong
+        newsAdapter = NewsAdapter(listOf())
         binding.recyclerView.adapter = newsAdapter
-
-        // Load news articles
         fetchNews()
     }
 
@@ -45,13 +41,11 @@ class NewsActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                // Handle failure
             }
         })
     }
 
     private fun updateAdapterData(articles: List<Article>) {
-        // Memperbarui data di adapter
         newsAdapter.updateArticles(articles)
     }
 }

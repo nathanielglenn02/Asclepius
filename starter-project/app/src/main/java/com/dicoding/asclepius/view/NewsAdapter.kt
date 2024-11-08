@@ -35,9 +35,8 @@ class NewsAdapter(private var articles: List<Article>) : RecyclerView.Adapter<Ne
 
     override fun getItemCount(): Int = articles.size
 
-    // Fungsi untuk memperbarui data artikel di dalam adapter
     fun updateArticles(newArticles: List<Article>) {
         articles = newArticles
-        notifyDataSetChanged() // Memperbarui tampilan RecyclerView
+        notifyDataSetChanged()
     }
 }
