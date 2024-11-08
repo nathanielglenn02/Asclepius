@@ -36,7 +36,8 @@ class NewsActivity : AppCompatActivity() {
             override fun onResponse(call: Call<NewsResponse>, response: Response<NewsResponse>) {
                 if (response.isSuccessful) {
                     val articles = response.body()?.articles ?: listOf()
-                    updateAdapterData(articles)
+                    val filteredArticles = articles.filter { it.title != "[Removed]" }
+                    updateAdapterData(filteredArticles)
                 }
             }
 
